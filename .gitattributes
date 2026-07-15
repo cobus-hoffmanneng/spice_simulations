@@ -1,0 +1,13 @@
+# Defensive: never let git CRLF-mangle binary SPICE model / schematic / waveform files.
+*.raw   binary
+*.asy   binary
+*.asc   binary
+*.op.raw binary
+
+# Text sources - normalize line endings.
+*.cir   text
+*.lib   text
+*.sub   text
+*.mod   text
+*.py    text
+*.md    text

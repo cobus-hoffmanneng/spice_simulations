@@ -1,0 +1,6 @@
+# PKA Simulation toolchain - pinned to the versions verified on 2026-07-15.
+# Recreate the venv on a new machine, then: pip install -r requirements.txt
+# (LTspice itself is NOT pip-installable - install separately from analog.com.)
+spicelib==1.6.2
+numpy==2.4.6
+matplotlib==3.11.0

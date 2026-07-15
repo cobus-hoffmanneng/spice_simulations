@@ -1,0 +1,29 @@
+# --- Generated simulation outputs (NEVER source) ---
+*.raw
+*.raw.*
+*.fra
+*.log
+*.op.raw
+*.op
+simout/
+
+# LTspice auto-generated netlist beside an .asc (regenerated on demand -> NOT source).
+# NOTE: hand-written netlists are tracked as *.cir (see README "source vs generated" rule).
+*.net
+
+# --- Python venv & caches (machine-specific, rebuilt from requirements.txt) ---
+# The venv lives OUTSIDE this repo (C:\Tools\spicelib-venv). This is defensive in case
+# someone ever creates one inside the tree - a committed venv is a mistake.
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+
+# --- LTspice / editor / OS junk ---
+*.bak
+*.asc.*
+Thumbs.db
+desktop.ini
+.DS_Store

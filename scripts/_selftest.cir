@@ -1,0 +1,9 @@
+* Toolchain smoke test - RC low-pass step response (SOURCE, hand-written, tracked).
+* R=1k, C=1uF => tau=1ms. Vin steps 0->1V at t=0.
+* Expect V(out) at t=tau ~= 1*(1-e^-1) = 0.6321V.
+V1 in 0 PWL(0 0 1n 1)
+R1 in out 1k
+C1 out 0 1u
+.tran 0 5m 0 1u
+.backanno
+.end
