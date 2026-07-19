@@ -1,0 +1,26 @@
+Version 4
+SymbolType BLOCK
+RECTANGLE Normal 0 0 128 96
+LINE Normal 16 20 40 20
+LINE Normal 16 76 40 76
+LINE Normal 40 20 40 76
+LINE Normal 40 48 64 48
+LINE Normal 64 32 64 64
+LINE Normal 88 24 112 24
+LINE Normal 88 24 88 72
+LINE Normal 88 72 112 72
+LINE Normal 100 48 88 48
+TEXT 64 88 Center 2 CWG 1.2/50 - 8/20
+WINDOW 0 64 -8 Bottom 2
+WINDOW 3 64 104 Top 2
+SYMATTR Prefix X
+SYMATTR Value IEC61000_4_5_CWG
+SYMATTR ModelFile IEC61000-4-5_Surge_CWG.sub
+SYMATTR Description IEC 61000-4-5 surge combination wave generator (1.2/50us OCV, 8/20us SCC, 2 ohm). Params: VPEAK, TSTART.
+SYMATTR SpiceLine VPEAK=1000 TSTART=1u
+PIN 128 32 LEFT 8
+PINATTR PinName out
+PINATTR SpiceOrder 1
+PIN 0 32 RIGHT 8
+PINATTR PinName gnd
+PINATTR SpiceOrder 2

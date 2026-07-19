@@ -1,0 +1,49 @@
+* IEC 61000-4-5 SURGE (Combination Wave) demo deck
+* Proves the CWG waveform (OCV into open, SCC into short) then drives an
+* example DUT: series line impedance -> TVS clamp -> protected node.
+* Run with LTspice (batch): opens & simulates directly. Uses run_sim.py in repo.
+* NOTE: .tran uses UIC because the generator pre-charges its storage cap.
+
+.include ../../models/IEC61000-4-5_Surge_CWG.sub
+
+* ---------------------------------------------------------------
+* (a) OCV test: generator into ~open circuit  -> verify 1.2/50 us
+*     VPEAK = 1 kV. V(ocv) should peak ~1000 V, front 1.2us, T2 50us.
+* ---------------------------------------------------------------
+XG1 ocv 0 IEC61000_4_5_CWG VPEAK=1000 TSTART=1u
+Rocv ocv 0 1G
+
+* ---------------------------------------------------------------
+* (b) SCC test: generator into ~short  -> verify 8/20 us
+*     I(Rscc) should peak ~500 A (=1000V/2ohm), front 8us, T2 20us.
+* ---------------------------------------------------------------
+XG2 scc 0 IEC61000_4_5_CWG VPEAK=1000 TSTART=1u
+Rscc scc 0 1m
+
+* ---------------------------------------------------------------
+* (c) Example DUT at 2 kV: line inductance + resistance, TVS clamp to
+*     ground, protected node with bulk cap + load. Watch V(prot), I(D1).
+*     TVSCLAMP is an ILLUSTRATIVE clamp (~40 V) - replace with the
+*     manufacturer SPICE model of your actual TVS in a real design.
+* ---------------------------------------------------------------
+XG3 sin 0 IEC61000_4_5_CWG VPEAK=2000 TSTART=1u
+Lline sin  n1   1u
+Rline n1   prot 0.5
+D1    0    prot TVSCLAMP
+Cbulk prot 0    100n
+Rload prot 0    100
+.model TVSCLAMP D(BV=40 IBV=1m Rs=0.3 N=2 Cjo=200p)
+
+.tran 0 100u 0 20n uic
+
+* ---- auto-extracted validation numbers (see .log after run) ----
+.meas TRAN Vocv_peak  MAX V(ocv)
+.meas TRAN t30        WHEN V(ocv)=300 RISE=1
+.meas TRAN t90        WHEN V(ocv)=900 RISE=1
+.meas TRAN Tfront_us  PARAM (1.67*(t90-t30))/1u
+.meas TRAN t50tail    WHEN V(ocv)=500 FALL=1
+.meas TRAN Iscc_peak  MAX I(Rscc)
+.meas TRAN Vprot_peak MAX V(prot)
+.meas TRAN Itvs_peak  MAX abs(I(D1))
+
+.end

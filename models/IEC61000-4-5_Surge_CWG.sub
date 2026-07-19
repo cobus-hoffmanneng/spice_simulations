@@ -1,0 +1,42 @@
+* ======================================================================
+*  IEC 61000-4-5  Combination Wave Generator (CWG)  -  1.2/50 us & 8/20 us
+* ----------------------------------------------------------------------
+*  Open-circuit voltage : 1.2/50 us  (front 1.2us +/-30%, T2 50us +/-20%)
+*  Short-circuit current: 8/20 us    (front 8us +/-20%, T2 20us +/-20%)
+*  Effective source impedance = Voc_peak / Isc_peak = 2 ohm
+*
+*  Ideal RLC realisation. Component values from the peer-reviewed
+*  "elementary and ideal" equivalent circuit:
+*     C.F.M. Carobbi & A. Bonci, "Elementary and ideal equivalent circuit
+*     model of the 1,2/50-8/20 us combination wave generator",
+*     IEEE EMC Magazine, 2013.  (values as tabulated on the IEC 61000-4-5
+*     Wikipedia page, "no coupling capacitor" ideal set.)
+*
+*  Topology (Carobbi fig. / IEC simplified diagram):
+*     Cc(charged) --SW-- A ; Rs1: A->gnd ; Rm: A->M ; Lr: M->out ; Rs2: out->gnd
+*  A single double-exponential CANNOT meet OCV and SCC at once; this RLC
+*  network does, by construction.
+*
+*  PORTS :  out  gnd      (surge appears at 'out' w.r.t 'gnd')
+*  PARAMS:  VPEAK  = target PEAK open-circuit voltage [V]  (e.g. 1000)
+*           TSTART = strike start time [s]                 (e.g. 1u)
+*
+*  NOTE: uses ic= on the storage cap -> the calling .tran MUST use "uic".
+* ======================================================================
+.subckt IEC61000_4_5_CWG out gnd params: VPEAK=1000 TSTART=1u
+* peak OCV is 0.943 x charge voltage -> charge to VPEAK/0.943 to hit VPEAK
+.param UC  = {VPEAK/0.943}
+.param CC  = 5.93u
+.param LR  = 10.9u
+.param RS1 = 20.2
+.param RS2 = 26.1
+.param RM  = 0.814
+Cc  chg gnd {CC} ic={UC}
+S1  chg A ctl gnd CWGSW
+Vc  ctl gnd PULSE(0 1 {TSTART} 1n 1n 1 1)
+Rs1 A   gnd {RS1}
+Rm  A   M   {RM}
+Lr  M   out {LR}
+Rs2 out gnd {RS2}
+.model CWGSW SW(Ron=1m Roff=1Meg Vt=0.5 Vh=0)
+.ends IEC61000_4_5_CWG

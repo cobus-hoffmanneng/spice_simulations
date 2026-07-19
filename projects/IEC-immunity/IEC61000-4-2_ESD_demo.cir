@@ -1,0 +1,40 @@
+* IEC 61000-4-2 ESD (contact discharge) demo deck
+* (a) current into 2-ohm target -> verify first peak / I@30ns / I@60ns / rise
+* (b) ESD zap into an example DUT: lead inductance -> TVS clamp -> victim pin.
+* Run with LTspice (batch) / repo run_sim.py. Contact discharge is the default.
+
+.include ../../models/IEC61000-4-2_ESD.sub
+
+* ---------------------------------------------------------------
+* (a) Calibration check: 4 kV into 2 ohm current target.
+*     I(Rtgt): peak ~15 A, I@30ns ~8 A, I@60ns ~4 A, rise ~0.8 ns.
+*     (Strike starts at TSTART=1n, so 30/60 ns points are at 31n/61n.)
+* ---------------------------------------------------------------
+XE1 tip1 0 IEC61000_4_2_ESD KV=4 TSTART=1n
+Rtgt tip1 0 2
+
+* ---------------------------------------------------------------
+* (b) Example DUT at 8 kV: contact point -> short trace/lead inductance
+*     -> ESD TVS clamp to ground -> high-impedance victim input.
+*     Watch V(prot) (voltage the IC pin actually sees) and I(D1).
+*     ESDTVS is ILLUSTRATIVE (~6 V clamp) - use the real part's SPICE
+*     model; clamp voltage is dominated by dynamic R and lead inductance.
+* ---------------------------------------------------------------
+XE2 zap 0 IEC61000_4_2_ESD KV=8 TSTART=1n
+Lpath zap  p1   50n
+Rpath p1   prot 0.1
+D1    0    prot ESDTVS
+Cnode prot 0    10p
+Rin   prot 0    1e6
+.model ESDTVS D(BV=6 IBV=1m Rs=0.5 N=2 Cjo=0.5p)
+
+.tran 0 100n 0 20p uic
+
+* ---- auto-extracted validation numbers (see .log after run) ----
+.meas TRAN Ipk_target MAX  I(Rtgt)
+.meas TRAN I30ns      FIND I(Rtgt) AT 31n
+.meas TRAN I60ns      FIND I(Rtgt) AT 61n
+.meas TRAN Vprot_peak MAX  V(prot)
+.meas TRAN Itvs_peak  MAX  abs(I(D1))
+
+.end

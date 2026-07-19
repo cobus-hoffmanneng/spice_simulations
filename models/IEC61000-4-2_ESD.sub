@@ -1,0 +1,40 @@
+* ======================================================================
+*  IEC 61000-4-2  ESD Generator  -  CONTACT discharge current
+* ----------------------------------------------------------------------
+*  Standard energy storage 150 pF / discharge resistance 330 ohm.
+*  This model reproduces the calibrated CONTACT-discharge CURRENT directly
+*  with a two-Heidler behavioural current source (the RC gun network alone
+*  misses the fast first peak / double-hump - the two-Heidler sum matches
+*  the standard verification points):
+*     first peak  ~ 3.75 A/kV (+/-15%),  rise ~0.8 ns (+/-25%)
+*     I@30ns      ~ 2.0  A/kV (+/-30%)
+*     I@60ns      ~ 1.0  A/kV (+/-30%)
+*
+*  Two-Heidler parameter set (fits IEC 61000-4-2 at 4 kV; scaled linearly
+*  with kV). Widely used set, e.g. Katsivelis/Fotis/Gonos, NTUA HV Lab:
+*     i1=16.6A t1=1.1ns t2=2ns ; i2=9.3A t3=12ns t4=37ns ; n=1.8
+*  Hand-check @4kV: peak~14.9A, I@30ns~8.0A, I@60ns~4.0A  (all in tol).
+*
+*  i(t) = SCALE * [ (i1/k1)(x/t1)^n / (1+(x/t1)^n) e^-x/t2
+*                 + (i2/k2)(x/t3)^n / (1+(x/t3)^n) e^-x/t4 ],
+*         x = time-TSTART (>=0), SCALE = kV/4,
+*         k = e^-( (ta/tb)(n*tb/ta)^(1/n) )  (Heidler peak-correction)
+*
+*  PORTS :  tip  gnd     (current injected OUT of 'tip' into the DUT)
+*  PARAMS:  KV     = discharge level in kV      (2/4/6/8 contact)
+*           TSTART = strike start time [s]
+* ======================================================================
+.subckt IEC61000_4_2_ESD tip gnd params: KV=4 TSTART=1n
+.param I1=16.6 T1=1.1n T2=2n
+.param I2=9.3  T3=12n  T4=37n
+.param NN=1.8
+.param K1 = exp(-(T1/T2)*pow(NN*T2/T1,1/NN))
+.param K2 = exp(-(T3/T4)*pow(NN*T4/T3,1/NN))
+.param SCALE = {KV/4}
+Bes gnd tip I=
++ {SCALE}*(
++   (I1/K1)*( pow(max(time-TSTART,0)/T1,NN)/(1+pow(max(time-TSTART,0)/T1,NN)) )*exp(-max(time-TSTART,0)/T2)
++ + (I2/K2)*( pow(max(time-TSTART,0)/T3,NN)/(1+pow(max(time-TSTART,0)/T3,NN)) )*exp(-max(time-TSTART,0)/T4)
++ )
+Rleak tip gnd 1G
+.ends IEC61000_4_2_ESD
